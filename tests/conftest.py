@@ -3,6 +3,18 @@ from pathlib import Path
 from src.core.database import DatabaseManager
 
 
+
+@pytest.fixture
+def empty_db(tmp_path: Path):
+    """Provides a clean, migrated database with zero rows"""
+    db = DatabaseManager(db_path=tmp_path/ "test_ecommerce.db")
+    db.run_migrations()
+    conn = db.get_connection()
+    try:
+        yield conn
+    finally:
+        conn.close()
+
 @pytest.fixture
 def db_connection(tmp_path: Path):
     """Provide an isolated, migrated, and seeded database connection per test."""
