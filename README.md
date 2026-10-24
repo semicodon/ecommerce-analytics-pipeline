@@ -33,41 +33,47 @@ Rather than placing raw SQL and plotting logic inside a single monolithic script
 ---
 
 ## 3. Repository Structure
+## System Architecture
 
 ```text
 ecommerce-analytics-pipeline/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml                          # GitHub Actions CI: runs pytest & pipeline on push/PR
+│       └── ci.yml                                    # Automated CI test suite & daily scheduled Cron ETL
 ├── db/
 │   ├── migrations/
-│   │   ├── 001_create_customers.sql        # DDL: Customers table
-│   │   ├── 002_create_orders.sql           # DDL: Orders table with status CHECK & FK cascade
-│   │   └── 003_create_order_items.sql      # DDL: Line items table with quantity/price constraints
+│   │   ├── 001_create_customers.sql                  # DDL: Customers table
+│   │   ├── 002_create_orders.sql                     # DDL: Orders table with CHECK & FK constraints
+│   │   ├── 003_create_order_items.sql                # DDL: Order line items table
+│   │   └── 004_create_customer_analytics_view.sql    # SQL View: CTEs + DENSE_RANK & revenue share windows
 │   └── seeds/
-│       └── dev_seed.sql                    # DML: Idempotent development seed records
-├── docs/
-│   └── GIT_WORKFLOW_GUIDE.md               # Workplace Git & Conventional Commits guide
-├── reports/                                # Generated stakeholder visualizations (git-ignored)
+│       └── dev_seed_inactive.sql                     # DML: Idempotent development seed data - kept here for                  
+│                                                     #     architecture reference only
+├── reports/                                          # Generated BI charts (.png) & Data Mart exports (.csv)
 ├── src/
 │   ├── core/
-│   │   ├── config.py                       # Project root & directory path constants
-│   │   └── database.py                     # DatabaseManager: connections, migrations, seeds
+│   │   ├── config.py                                 # Centralized filesystem & environment paths
+│   │   └── database.py                               # Connection manager, migration & seed runner
 │   ├── domains/
 │   │   ├── customers/
-│   │   │   ├── entity.py                   # CustomerSpendSummary entity & tier segmentation
-│   │   │   └── repository.py               # Analytical SQL extraction queries
+│   │   │   ├── entity.py                             # Immutable domain models & segmentation rules
+│   │   │   └── repository.py                         # SQL data access & view mapping layer
 │   │   └── analytics/
-│   │       ├── service.py                  # Executive KPI aggregation service
-│   │       └── reports.py                  # Matplotlib chart generator
-│   └── main.py                             # Application composition root & CLI entrypoint
+│   │       ├── service.py                            # Executive KPI calculation & dashboard slice filtering
+│   │       └── reports.py                            # Matplotlib chart & CSV Data Mart exporters
+│   └── dashboard.py                                  # Interactive Streamlit BI web application
 ├── tests/
-│   ├── conftest.py                         # Isolated per-test database fixture via tmp_path
-│   ├── test_database.py                    # Schema, migration, and FK constraint tests
-│   └── test_customer_analytics.py          # Repository, service, and report export tests
-├── pytest.ini                              # Pytest path & discovery settings
-├── requirements.txt                        # Project dependencies
-└── README.md
+│   ├── conf_test_seeds.py                            # Centralized test seed records & expected constants
+│   ├── conftest.py                                   # Isolated tmp_path DB fixtures & test factories
+│   ├── test_analytics_report.py                      # KPI service, dashboard filter & export tests
+│   ├── test_customer_spend_summary.py                # Parameterized repository & SQL View tests
+│   ├── test_dashboard_analytics.py                   # Streamlit dashboard analytics tests
+│   └── test_database.py                              # DB migration & seed tests
+├── pytest.ini
+├── main.py                                           # CLI production ETL entrypoint
+├── requirements.txt
+└── README.md                                    
+
 ```
 
 ---
@@ -126,7 +132,7 @@ pip install -r requirements.txt
 ### 2. Run the Analytics Pipeline
 Execute the application entrypoint from the project root:
 ```bash
-python -m src.main
+python -m main
 ```
 
 **Expected Terminal Output:**
@@ -150,7 +156,13 @@ Evan Wright      | Canada  | $   0.00 | Churned / Inactive
 
 ### 3. Run the Automated Test Suite
 ```bash
-pytest -v
+pytest -v -s
 ```
 
----s.
+### 4. Launch the Interactive Streamlit BI Dashboard
+Starts a local BI web server at `http://localhost:8501` with country/segment multi-select filters, real-time KPI cards, interactive charts, and one-click CSV Data Mart downloads:
+```bash
+streamlit run src/dashboard.py
+```
+![alt text](reports/dashboard_preview.png)
+
