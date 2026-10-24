@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 from src.domains.customers.repository import CustomerRepository
 from src.domains.analytics.reports import ReportGenerator
-from conf_test_seeds import ExpectedSeedData
+from tests.conf_test_seeds import ExpectedSeedData
 
 
 def test_customer_spend_summaries_query(db_connection):

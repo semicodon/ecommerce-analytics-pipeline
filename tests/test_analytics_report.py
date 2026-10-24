@@ -1,7 +1,7 @@
 from src.domains.analytics.reports import ReportGenerator
 from src.domains.analytics.service import AnalyticsService
 from src.domains.customers.repository import CustomerRepository
-from conf_test_seeds import ExpectedSeedData
+from tests.conf_test_seeds import ExpectedSeedData
 
 def test_analytics_service_kpi_report(db_connection):
     repo = CustomerRepository(db_connection)
