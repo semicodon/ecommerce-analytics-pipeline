@@ -1,8 +1,10 @@
+
+# Kept here for architecture reference. Use `tests.conftest.SEED_FILE` instead.
+
 import sqlite3
 import importlib.util
 from pathlib import Path
-from src.core.config import DB_PATH, MIGRATIONS_DIR, SEEDS_DIR
-
+from src.core.config import DB_PATH, MIGRATIONS_DIR, SEEDS_DIR, SEED_FILE
 
 
 class DatabaseManager:
@@ -28,7 +30,7 @@ class DatabaseManager:
                 conn.executescript(sql_file.read_text(encoding="utf-8"))
 
 
-    def run_seeds(self, seed_file=SEEDS_DIR/"dev_seed.sql") -> None:
+    def run_seeds(self, seed_file=SEED_FILE) -> None:
         """Executes development seed data in dependency order."""
         if not seed_file.is_file():
             raise FileNotFoundError(f"Seed file not found: {seed_file}")

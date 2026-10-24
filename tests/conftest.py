@@ -1,9 +1,7 @@
 import pytest
 from pathlib import Path
 from src.core.database import DatabaseManager
-
-SEED_FILE = Path(__file__).parent / "conf_test_seeds.py"
-
+from src.core.config import SEED_FILE
 
 @pytest.fixture
 def empty_db(tmp_path: Path):
