@@ -1,6 +1,7 @@
 import sqlite3
 from typing import List
-from src.domains.customers.entity import CustomerSpendSummary
+from src.domains.customers.entity import CustomerSpendSummary, CustomerWindowMetrics
+
 
 class CustomerRepository:
     def __init__(self, conn: sqlite3.Connection):
@@ -57,5 +58,44 @@ class CustomerRepository:
         rows = self.conn.execute(query).fetchall()
         return [
             row['name']
+            for row in rows
+        ]
+
+
+    def fetch_customer_window_metrics(self) -> List[CustomerWindowMetrics]:
+        """Queries the v_customer_analytics SQL view for rankings and revenue shares."""
+
+        query = """
+            SELECT
+                customer_id,
+                name,
+                country,
+                completed_orders_count,
+                total_spend,
+                last_order_date,
+                spend_rank,
+                global_revenue_share_pct,
+                country_revenue_share_pct
+                
+                COALESCE(global_revenue_share_pct, 0.0) AS global_revenue_share_pct
+                COALESCE(country_revenue_share_pct, 0.0) AS country_revenue_share_pct
+            
+            FROM v_customer_analytics
+            ORDER BY spend_rank ASC, customer_id ASC;     
+        """
+        rows = self.conn.execute(query).fetchall()
+
+        return [
+            CustomerWindowMetrics(
+                customer_id=row['customer_id'],
+                name=row['name'],
+                country=row['country'],
+                completed_orders_count=row['completed_orders_count'],
+                total_spend=float(row['total_spend']),
+                last_order_date=row['last_order_date'],
+                spend_rank=int(row['spend_rank']),
+                global_revenue_share_pct=float(row['global_revenue_share_pct']),
+                country_revenue_share_pct=float(row['country_revenue_share_pct']),
+            )
             for row in rows
         ]
