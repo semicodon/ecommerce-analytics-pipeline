@@ -46,3 +46,15 @@ class ExpectedSeedData:
     CHARLIE_EXPECTED_SEGMENT = "Inactive"
 
     EXPECTED_NEVER_ORDERED = ["Evan Wright"]
+
+    # --- Window Function & Revenue Share Expectations ---
+    ALICE_EXPECTED_RANK = 1
+    ALICE_EXPECTED_GLOBAL_SHARE = 82.71  # 550.0 / 665.0 * 100
+    ALICE_EXPECTED_COUNTRY_SHARE = 100.0  # 550.0 / 550.0 (USA total) * 100
+
+    DIANA_NAME = "Diana Prince"
+    DIANA_EXPECTED_RANK = 2
+    DIANA_EXPECTED_GLOBAL_SHARE = 9.77   # 65.0 / 665.0 * 100
+
+    CHARLIE_EXPECTED_RANK = 4            # Tied at $0.00 with Evan Wright
+    CHARLIE_EXPECTED_GLOBAL_SHARE = 0.0
